@@ -47,9 +47,14 @@ export default function CartPage() {
           title="Your cart is empty"
           description="Looks like you haven't added anything yet. Let's find something beautiful."
           action={
-            <Button asChild>
-              <Link to="/shop">Start Shopping</Link>
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button asChild>
+                <Link to="/shop">Start Shopping</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link to="/account/orders">Go to your orders</Link>
+              </Button>
+            </div>
           }
         />
       </div>
