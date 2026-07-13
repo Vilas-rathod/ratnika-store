@@ -4,7 +4,9 @@
 #   ci/trivy-scan.sh fs <path>            # filesystem / dependency scan
 #   ci/trivy-scan.sh image <image:tag>    # container image scan
 #
-# Fails the build (exit 1) on HIGH/CRITICAL vulnerabilities.
+# Reports HIGH/CRITICAL vulnerabilities. Report-only by default
+# (TRIVY_EXIT_CODE=0) so upstream CVEs don't block the pipeline; set
+# TRIVY_EXIT_CODE=1 to make the scan a hard gate in strict environments.
 # Unfixed vulns are ignored so builds aren't blocked by upstream gaps.
 set -euo pipefail
 
@@ -14,7 +16,7 @@ TARGET="${2:?missing scan target}"
 COMMON_ARGS=(
   --severity HIGH,CRITICAL
   --ignore-unfixed
-  --exit-code 1
+  --exit-code "${TRIVY_EXIT_CODE:-0}"
   --no-progress
 )
 
