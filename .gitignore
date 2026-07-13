@@ -1,0 +1,37 @@
+# ── Secrets / env (NEVER commit) ─────────────────────────────────
+.env
+.env.local
+.env.*.local
+deploy/.env
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# ── Java / Maven ─────────────────────────────────────────────────
+backend/target/
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# ── Node / frontend ──────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── Coverage / reports ───────────────────────────────────────────
+**/site/jacoco/
+**/surefire-reports/
+coverage/
+.scannerwork/
+
+# ── IDE / OS ─────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# ── Runtime data ─────────────────────────────────────────────────
+uploads/

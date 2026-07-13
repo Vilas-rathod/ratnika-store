@@ -1,0 +1,123 @@
+spring:
+  application:
+    name: ratnika-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Hibernate manages the schema by default so the app runs out of the box.
+      # For strict production, set to "validate" and enable Flyway (see V1__init.sql).
+      ddl-auto: ${DDL_AUTO:update}
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 30
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    # Flyway is wired and a baseline migration is provided. Flip to true
+    # (with ddl-auto=validate) to manage the schema via versioned migrations.
+    enabled: ${FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
+
+#  data:
+#    redis:
+#      host: ${REDIS_HOST:localhost}
+#      port: ${REDIS_PORT:6379}
+#      timeout: 2000ms
+
+#  cache:
+#    type: redis
+#    redis:
+#      time-to-live: 600000        # 10 minutes default TTL
+#      cache-null-values: false
+
+#  mail:
+#    host: ${MAIL_HOST:localhost}
+#    port: ${MAIL_PORT:1025}
+#    username: ${MAIL_USERNAME:}
+#    password: ${MAIL_PASSWORD:}
+#    properties:
+#      mail:
+#        smtp:
+#          auth: ${MAIL_SMTP_AUTH:false}
+#          starttls:
+#            enable: ${MAIL_SMTP_STARTTLS:false}
+
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 40MB
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# ── Application-specific configuration ─────────────────────────────
+app:
+  api-prefix: /api/v1
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4173}
+  jwt:
+    # Base64-encoded 256-bit secret. OVERRIDE in production via env.
+    secret: ${JWT_SECRET:c2VjcmV0LWtleS1mb3ItdmVlei1jYXJ0LWNoYW5nZS1pbi1wcm9kdWN0aW9uLTEyMzQ1Njc4OTA=}
+    access-token-expiration: ${JWT_ACCESS_EXP:900000}          # 15 minutes
+    refresh-token-expiration: ${JWT_REFRESH_EXP:604800000}     # 7 days
+    issuer: ratnika
+  otp:
+    expiration-minutes: 10
+    length: 6
+  store:
+    name: Ratnika
+    support-email: support@ratnika.in
+    support-phone: "+91 98765 43210"
+    address-line: "Koregaon Park, Pune, Maharashtra 411001, India"
+    free-shipping-threshold: 999
+    shipping-fee: 79
+    cod-enabled: true
+    frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:rzp_test_}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:0942e83198b798d36ebdafe19df9145f0eca79adf59c2a84b3717a0166d9bdab}
+    enabled: ${RAZORPAY_ENABLED:true}
+  checkout:
+    payment-timeout-minutes: ${PAYMENT_TIMEOUT_MINUTES:15}
+  storage:
+    provider: ${STORAGE_PROVIDER:local}   # local | cloudinary | s3 | minio
+    public-base-url: ${STORAGE_PUBLIC_URL:http://localhost:8080/uploads}
+
+# ── Actuator / Monitoring ──────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.ratnika: ${LOG_LEVEL:INFO}
+    org.springframework.security: WARN

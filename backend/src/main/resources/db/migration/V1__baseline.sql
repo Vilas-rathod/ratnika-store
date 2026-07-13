@@ -1,0 +1,16 @@
+-- ─────────────────────────────────────────────────────────────────
+-- Flyway baseline.
+--
+-- By default the app runs with Hibernate schema management
+-- (spring.jpa.hibernate.ddl-auto=update, flyway disabled) so it works
+-- out of the box. For strict production, generate the real schema from
+-- the entities and place versioned migrations here:
+--
+--   1. Start the app once with ddl-auto=create against an empty DB.
+--   2. Dump the schema:  pg_dump --schema-only ratnika > V1__init.sql
+--   3. Replace this file with that dump, set DDL_AUTO=validate and
+--      FLYWAY_ENABLED=true.
+--
+-- This placeholder lets Flyway baseline cleanly if enabled early.
+-- ─────────────────────────────────────────────────────────────────
+SELECT 1;

@@ -1,0 +1,145 @@
+# ── Ratnika — Full Stack Compose ──────────────────────────────
+# Usage:
+#   docker compose up -d --build
+# Services:
+#   frontend  http://localhost         backend   http://localhost:8080
+#   swagger   http://localhost:8080/swagger-ui.html
+#   minio     http://localhost:9001    mailhog   http://localhost:8025
+#   grafana   http://localhost:3000    prometheus http://localhost:9090
+
+name: ratnika
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ratnika-mysql
+    environment:
+      MYSQL_DATABASE: ratnika
+      MYSQL_USER: ratnika
+      MYSQL_PASSWORD: ratnika
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"   # host 3307 (3306 often taken by a local MySQL); app uses internal mysql:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ratnika-net]
+
+  redis:
+    image: redis:7-alpine
+    container_name: ratnika-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [ratnika-net]
+
+  minio:
+    image: minio/minio:latest
+    container_name: ratnika-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [ratnika-net]
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ratnika-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks: [ratnika-net]
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ratnika-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      APP_SEED_ENABLED: "true"   # seed demo products + demo accounts on first run (DB empty)
+      DDL_AUTO: update
+      DB_URL: jdbc:mysql://mysql:3306/ratnika?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ratnika
+      DB_PASSWORD: ratnika
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:5173
+      FRONTEND_URL: http://localhost
+      JWT_SECRET: c2VjcmV0LWtleS1mb3ItdmVlei1jYXJ0LWNoYW5nZS1pbi1wcm9kdWN0aW9uLTEyMzQ1Njc4OTA=
+    ports:
+      - "8080:8080"
+    networks: [ratnika-net]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_USE_MOCK_API: "false"
+        VITE_API_BASE_URL: /api/v1
+    container_name: ratnika-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks: [ratnika-net]
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ratnika-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks: [ratnika-net]
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ratnika-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks: [ratnika-net]
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+  grafana_data:
+
+networks:
+  ratnika-net:
+    driver: bridge
