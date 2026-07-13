@@ -17,6 +17,7 @@ COMMON_ARGS=(
   --severity HIGH,CRITICAL
   --ignore-unfixed
   --exit-code "${TRIVY_EXIT_CODE:-0}"
+  --timeout "${TRIVY_TIMEOUT:-15m}"
   --no-progress
 )
 

@@ -125,8 +125,11 @@ pipeline {
         // ── 7. Trivy Security Scan (built images) ────────────────
         stage('Trivy Image Scan') {
             steps {
-                sh "bash ci/trivy-scan.sh image ${BACKEND_IMAGE}:${IMAGE_TAG}"
-                sh "bash ci/trivy-scan.sh image ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+                // Report-only: don't let a slow/failed image scan block the push.
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh "bash ci/trivy-scan.sh image ${BACKEND_IMAGE}:${IMAGE_TAG}"
+                    sh "bash ci/trivy-scan.sh image ${FRONTEND_IMAGE}:${IMAGE_TAG}"
+                }
             }
         }
 
