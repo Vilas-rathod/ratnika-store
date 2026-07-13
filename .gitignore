@@ -26,6 +26,7 @@ coverage/
 .scannerwork/
 
 # ── IDE / OS ─────────────────────────────────────────────────────
+.claude/
 .idea/
 *.iml
 .vscode/

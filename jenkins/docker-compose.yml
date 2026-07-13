@@ -1,0 +1,51 @@
+# ── Ratnika CI toolchain (local) ─────────────────────────────────
+# Runs Jenkins + SonarQube on this machine.
+#   cd jenkins
+#   docker compose up -d --build
+#
+# UIs:  Jenkins  http://localhost:8081      (8080 is the app backend)
+#       SonarQube http://localhost:9002     (9000 is MinIO)
+#
+# Jenkins builds images via the host Docker (socket is mounted below).
+
+name: ratnika-ci
+
+services:
+  jenkins:
+    build: .
+    image: ratnika-jenkins:latest
+    container_name: jenkins
+    user: root
+    restart: unless-stopped
+    ports:
+      - "8081:8080"     # Jenkins web UI
+      - "50000:50000"   # inbound agents
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      # "Docker outside of Docker" — Jenkins drives the host's Docker Desktop
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [ci]
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    restart: unless-stopped
+    ports:
+      - "9002:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks: [ci]
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+
+networks:
+  ci:
+    driver: bridge
