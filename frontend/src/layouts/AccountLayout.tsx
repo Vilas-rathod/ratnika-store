@@ -1,5 +1,6 @@
-import { Heart, LayoutDashboard, MapPin, Package, Star, User as UserIcon } from 'lucide-react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Heart, Home, LayoutDashboard, MapPin, Package, Star, User as UserIcon } from 'lucide-react';
+import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -17,11 +18,18 @@ export function AccountLayout() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-semibold">
-          Hello, {user?.firstName} 👋
-        </h1>
-        <p className="text-sm text-muted-foreground">Manage your orders, addresses and profile.</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold">
+            Hello, {user?.firstName} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground">Manage your orders, addresses and profile.</p>
+        </div>
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link to="/">
+            <Home className="h-4 w-4" /> Back to Home
+          </Link>
+        </Button>
       </div>
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start">

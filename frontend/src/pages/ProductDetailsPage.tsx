@@ -8,9 +8,10 @@ import {
   ShieldCheck,
   ShoppingBag,
   Truck,
+  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import type { ProductVariant } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +36,7 @@ export default function ProductDetailsPage() {
   const { data: product, isLoading, isError } = useProduct(slug ?? '');
   const { data: related } = useRelatedProducts(product?.id);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const wishlisted = useIsWishlisted(product?.id ?? '');
   const [quantity, setQuantity] = useState(1);
   const [variant, setVariant] = useState<ProductVariant | null>(null);
@@ -55,10 +57,10 @@ export default function ProductDetailsPage() {
   const outOfStock = effectiveStock <= 0;
   const needsVariant = product.variants.length > 0 && !variant;
 
-  const handleAdd = () => {
+  const addItemToCart = (): boolean => {
     if (needsVariant) {
       toast.warn('Please select a size first');
-      return;
+      return false;
     }
     dispatch(
       addToCart({
@@ -74,7 +76,16 @@ export default function ProductDetailsPage() {
         variantLabel: variant ? `${variant.name}: ${variant.value}` : undefined,
       }),
     );
-    toast.success(`${product.name} added to cart`);
+    return true;
+  };
+
+  const handleAdd = () => {
+    if (addItemToCart()) toast.success(`${product.name} added to cart`);
+  };
+
+  // Buy Now: add to cart and jump straight to checkout.
+  const handleBuyNow = () => {
+    if (addItemToCart()) navigate('/checkout');
   };
 
   const handleWishlist = () => {
@@ -196,12 +207,23 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
-            <Button size="lg" className="flex-1" onClick={handleAdd} disabled={outOfStock}>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-3">
+              <Button size="lg" className="flex-1" onClick={handleBuyNow} disabled={outOfStock}>
+                <Zap className="h-5 w-5" /> Buy Now
+              </Button>
+              <Button size="lg" variant="outline" onClick={handleWishlist} aria-label="Wishlist">
+                <Heart className={cn('h-5 w-5', wishlisted && 'fill-destructive text-destructive')} />
+              </Button>
+            </div>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full"
+              onClick={handleAdd}
+              disabled={outOfStock}
+            >
               <ShoppingBag className="h-5 w-5" /> Add to Cart
-            </Button>
-            <Button size="lg" variant="outline" onClick={handleWishlist} aria-label="Wishlist">
-              <Heart className={cn('h-5 w-5', wishlisted && 'fill-destructive text-destructive')} />
             </Button>
           </div>
 

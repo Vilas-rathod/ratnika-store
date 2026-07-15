@@ -231,6 +231,9 @@ export default function CheckoutPage() {
                   <div className="flex-1">
                     <p className="font-medium">Cash on Delivery</p>
                     <p className="text-xs text-muted-foreground">Pay when your order arrives</p>
+                    <p className="mt-1 text-xs font-medium text-[var(--success)]">
+                      No advance payment needed — pay in cash at your doorstep. 100% safe &amp; contactless.
+                    </p>
                   </div>
                 </label>
               </RadioGroup>

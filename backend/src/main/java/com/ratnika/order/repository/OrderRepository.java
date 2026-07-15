@@ -17,7 +17,12 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @EntityGraph(attributePaths = "items")
     List<Order> findByUserOrderByCreatedAtDesc(User user);
 
-    @EntityGraph(attributePaths = {"items", "timeline"})
+    // Fetch ONLY items eagerly. Fetching a second collection ("timeline") in the
+    // same query produces a cartesian product that duplicates order items (an
+    // order with 2 timeline events showed each line item twice, doubling the
+    // quantity on order details & invoices). timeline loads lazily during mapping
+    // (all callers are @Transactional).
+    @EntityGraph(attributePaths = "items")
     Optional<Order> findWithDetailsById(UUID id);
 
     Optional<Order> findByOrderNumber(String orderNumber);
