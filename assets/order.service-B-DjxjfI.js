@@ -1,0 +1,1 @@
+import{U as e}from"./index-BKP1tHmu.js";const s={listMyOrders(){return e.get("/orders")},getOrder(r){return e.get(`/orders/${r}`)},cancelOrder(r,t){return e.post(`/orders/${r}/cancel`,{reason:t})},validateCoupon(r,t){return e.post("/coupons/validate",{code:r,subtotal:t})}};export{s as o};

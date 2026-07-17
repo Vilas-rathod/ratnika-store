@@ -1,0 +1,1 @@
+import{U as s}from"./index-BKP1tHmu.js";const t={updateProfile(e){return s.put("/users/me",e)},listAddresses(){return s.get("/addresses")},addAddress(e){return s.post("/addresses",e)},updateAddress(e,r){return s.put(`/addresses/${e}`,r)},deleteAddress(e){return s.delete(`/addresses/${e}`)}};export{t as a};
